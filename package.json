@@ -5,6 +5,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1",
+    "mysql2": "^3.11.4",
+    "sequelize": "^6.37.5",
     "socket.io": "^4.8.1",
     "ssh2": "^1.16.0"
   },

@@ -3,6 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const { Client } = require('ssh2');
+const { Sequelize } = require('sequelize');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,12 +11,23 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
+    allowedHeaders: ["Content-Type"], 
     credentials: true
   }
 });
 
 app.use(cors({ origin: 'http://localhost:3000' }));
+
+const sequelize = new Sequelize('linux', 'root', 'test', {
+  host: 'localhost', 
+  dialect: 'mysql', 
+  port: 3307, 
+});
+
+sequelize.authenticate()
+  .then(() => console.log('Database connected successfully.'))
+  .catch((err) => console.error('Unable to connect to the database:', err));
+
 
 io.on('connection', (socket) => {
   const sshClient = new Client();
