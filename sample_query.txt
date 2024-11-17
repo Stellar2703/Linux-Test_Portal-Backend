@@ -1,0 +1,78 @@
+CREATE TABLE student_list (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50),
+    level INT,
+    register_number VARCHAR(20)
+);
+
+CREATE TABLE level_master (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    level INT,
+    ip VARCHAR(20)
+);
+
+CREATE TABLE system_list (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    password VARCHAR(50),
+    level INT
+);
+
+CREATE TABLE task_description (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50),
+    task1 VARCHAR(255),
+    task2 VARCHAR(255),
+    task3 VARCHAR(255),
+    task4 VARCHAR(255),
+    task5 VARCHAR(255),
+    task6 VARCHAR(255),
+    task7 VARCHAR(255),
+    task8 VARCHAR(255),
+    task9 VARCHAR(255),
+    task10 VARCHAR(255)
+);
+
+-- Insert dummy data
+INSERT INTO student_list (name, level, register_number)
+VALUES
+('Alice', 1, 'REG001'),
+('Bob', 2, 'REG002'),
+('Charlie', 3, 'REG003'),
+('Diana', 4, 'REG004'),
+('Eve', 1, 'REG005'),
+('Frank', 2, 'REG006'),
+('Grace', 3, 'REG007'),
+('Hank', 4, 'REG008'),
+('Ivy', 1, 'REG009'),
+('Jack', 2, 'REG010'),
+('Kathy', 3, 'REG011'),
+('Leo', 4, 'REG012'),
+('Mona', 1, 'REG013'),
+('Nina', 2, 'REG014'),
+('Oscar', 3, 'REG015');
+
+INSERT INTO level_master (level, ip)
+VALUES
+(1, '192.168.1.101'),
+(2, '192.168.1.102'),
+(3, '192.168.1.103'),
+(4, '192.168.1.104');
+
+INSERT INTO system_list (username, password, level)
+VALUES
+('user1', 'pass1', 1),
+('user2', 'pass2', 2),
+('user3', 'pass3', 3),
+('user4', 'pass4', 4),
+('user5', 'pass5', 1),
+('user6', 'pass6', 2),
+('user7', 'pass7', 3),
+('user8', 'pass8', 4);
+
+INSERT INTO task_description (username, task1, task2, task3, task4, task5, task6, task7, task8, task9, task10)
+VALUES
+('user1', 'Task 1.1', 'Task 1.2', 'Task 1.3', 'Task 1.4', 'Task 1.5', 'Task 1.6', 'Task 1.7', 'Task 1.8', 'Task 1.9', 'Task 1.10'),
+('user2', 'Task 2.1', 'Task 2.2', 'Task 2.3', 'Task 2.4', 'Task 2.5', 'Task 2.6', 'Task 2.7', 'Task 2.8', 'Task 2.9', 'Task 2.10'),
+('user3', 'Task 3.1', 'Task 3.2', 'Task 3.3', 'Task 3.4', 'Task 3.5', 'Task 3.6', 'Task 3.7', 'Task 3.8', 'Task 3.9', 'Task 3.10'),
+('user4', 'Task 4.1', 'Task 4.2', 'Task 4.3', 'Task 4.4', 'Task 4.5', 'Task 4.6', 'Task 4.7', 'Task 4.8', 'Task 4.9', 'Task 4.10');
