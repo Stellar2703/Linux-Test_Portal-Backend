@@ -76,3 +76,11 @@ VALUES
 ('user2', 'Task 2.1', 'Task 2.2', 'Task 2.3', 'Task 2.4', 'Task 2.5', 'Task 2.6', 'Task 2.7', 'Task 2.8', 'Task 2.9', 'Task 2.10'),
 ('user3', 'Task 3.1', 'Task 3.2', 'Task 3.3', 'Task 3.4', 'Task 3.5', 'Task 3.6', 'Task 3.7', 'Task 3.8', 'Task 3.9', 'Task 3.10'),
 ('user4', 'Task 4.1', 'Task 4.2', 'Task 4.3', 'Task 4.4', 'Task 4.5', 'Task 4.6', 'Task 4.7', 'Task 4.8', 'Task 4.9', 'Task 4.10');
+
+
+INSERT INTO task_description (username, task1, task2, task3, task4, task5, task6, task7, task8, task9, task10)
+VALUES
+('user5', 'Task 1.1', 'Task 1.2', 'Task 1.3', 'Task 1.4', 'Task 1.5', 'Task 1.6', 'Task 1.7', 'Task 1.8', 'Task 1.9', 'Task 1.10'),
+('user6', 'Task 2.1', 'Task 2.2', 'Task 2.3', 'Task 2.4', 'Task 2.5', 'Task 2.6', 'Task 2.7', 'Task 2.8', 'Task 2.9', 'Task 2.10'),
+('user7', 'Task 3.1', 'Task 3.2', 'Task 3.3', 'Task 3.4', 'Task 3.5', 'Task 3.6', 'Task 3.7', 'Task 3.8', 'Task 3.9', 'Task 3.10'),
+('user8', 'Task 4.1', 'Task 4.2', 'Task 4.3', 'Task 4.4', 'Task 4.5', 'Task 4.6', 'Task 4.7', 'Task 4.8', 'Task 4.9', 'Task 4.10');
