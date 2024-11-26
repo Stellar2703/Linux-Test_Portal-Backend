@@ -13,25 +13,6 @@ app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json()); // Parse JSON request bodies
 
 
-// API Endpoint to Run Bash Script
-app.get('/api/check-tasks', (req, res) => {
-  const scriptPath = '/path/to/your/script.sh'; // Replace with the full path to your script
-
-  exec(`bash ${scriptPath}`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error executing script: ${error.message}`);
-      return res.status(500).json({ message: 'Error executing script', error: error.message });
-    }
-    if (stderr) {
-      console.error(`Script stderr: ${stderr}`);
-      return res.status(500).json({ message: 'Script error', error: stderr });
-    }
-
-    // Send the script output to the frontend
-    res.json({ output: stdout });
-  });
-});
-
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
