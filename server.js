@@ -52,11 +52,13 @@ io.on('connection', (socket) => {
 
     sshClient
       .on('ready', () => {
+        let skipStream = true
         console.log('SSH connection established');
         socket.emit('data', '\r\nSSH connection established\r\n');
 
         // Start an interactive shell session
-        sshClient.shell({ term: 'xterm', rows: 24, cols: 80 }, (err, stream) => {
+        sshClient.shell({ term: 'xterm', rows: 20, cols: 80 }, (err, stream) => {
+
           if (err) {
             console.error('Shell error:', err);
             return socket.emit('data', `Error: ${err.message}`);
@@ -64,7 +66,10 @@ io.on('connection', (socket) => {
 
           // Forward data from the SSH shell to the frontend
           stream.on('data', (data) => {
-            socket.emit('data', data.toString());
+            if(!skipStream){
+              socket.emit('data', data.toString());
+            }
+            skipStream = false
           });
 
           // Notify frontend when the SSH session ends
