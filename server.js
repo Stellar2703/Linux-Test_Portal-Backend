@@ -15,7 +15,7 @@ app.use(express.json()); // Parse JSON request bodies
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: 'http://10.10.165.93:3000',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
