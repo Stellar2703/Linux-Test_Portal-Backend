@@ -201,15 +201,42 @@ app.post('/api/execute-script', (req, res) => {
     });
   });
 
-app.post('/api/logout', (req, res) => {
-  const { level_user_id } = req.body;
-  console.log('Logging out user:', level_user_id);
-  const resetstatus = `UPDATE system_list SET status = 0 WHERE id=${level_user_id}`;
-  db.query(resetstatus)
-  // Perform logout actions
-  res.json({ message: 'Logout successful' });
-  console.log('Logout successful');
-});
+  app.post('/api/logout', (req, res) => {
+    const { level_user_id, complete, reg_no } = req.body; // Ensure `reg_no` is sent in the request body
+    console.log('Logging out user:', level_user_id);
+  
+    if (complete === 0) {
+      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+      db.query(resetStatus, [level_user_id], (err) => {
+        if (err) {
+          console.error('Error resetting status:', err);
+          return res.status(500).json({ message: 'Failed to reset status' });
+        }
+      });
+    } else if (complete === 1) {
+      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+      const updateLevel = `UPDATE student_list SET level = level + 1 WHERE register_number = ?`;
+  
+      // Execute queries sequentially
+      db.query(resetStatus, [level_user_id], (err) => {
+        if (err) {
+          console.error('Error resetting status:', err);
+          return res.status(500).json({ message: 'Failed to reset status' });
+        }
+        db.query(updateLevel, [reg_no], (err) => {
+          if (err) {
+            console.error('Error updating level:', err);
+            return res.status(500).json({ message: 'Failed to update level' });
+          }
+        });
+      });
+    }
+  
+    // Send success response
+    res.json({ message: 'Logout successful' });
+    console.log('Logout successful');
+  });
+  
 
 // Start the server
 const PORT = 4000;
