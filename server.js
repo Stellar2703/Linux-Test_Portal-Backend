@@ -197,6 +197,13 @@ app.post('/api/execute-script', (req, res) => {
     });
   });
 
+app.post('/api/logout', (req, res) => {
+  const resetstatus = `UPDATE student_list SET status = 0`;
+  // Perform logout actions
+  res.json({ message: 'Logout successful' });
+  console.log('Logout successful');
+});
+
 // Start the server
 const PORT = 4000;
 server.listen(PORT, () => {
