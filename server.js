@@ -202,7 +202,10 @@ app.post('/api/execute-script', (req, res) => {
   });
 
 app.post('/api/logout', (req, res) => {
-  const resetstatus = `UPDATE student_list SET status = 0`;
+  const { level_user_id } = req.body;
+  console.log('Logging out user:', level_user_id);
+  const resetstatus = `UPDATE system_list SET status = 0 WHERE id=${level_user_id}`;
+  db.query(resetstatus)
   // Perform logout actions
   res.json({ message: 'Logout successful' });
   console.log('Logout successful');
