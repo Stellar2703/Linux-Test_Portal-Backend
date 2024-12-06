@@ -22,6 +22,7 @@ const io = new Server(server, {
   },
 });
 
+
 // MySQL Connection
 const db = mysql.createConnection({
   host: 'localhost',
@@ -51,12 +52,13 @@ io.on('connection', (socket) => {
 
     sshClient
       .on('ready', () => {
-        let skipStream = true;
+        let skipStream = true
         console.log('SSH connection established');
         socket.emit('data', '\r\nSSH connection established\r\n');
 
         // Start an interactive shell session
         sshClient.shell({ term: 'xterm', rows: 20, cols: 80 }, (err, stream) => {
+
           if (err) {
             console.error('Shell error:', err);
             return socket.emit('data', `Error: ${err.message}`);
@@ -64,10 +66,10 @@ io.on('connection', (socket) => {
 
           // Forward data from the SSH shell to the frontend
           stream.on('data', (data) => {
-            if (!skipStream) {
+            if(!skipStream){
               socket.emit('data', data.toString());
             }
-            skipStream = false;
+            skipStream = false
           });
 
           // Notify frontend when the SSH session ends
@@ -77,19 +79,9 @@ io.on('connection', (socket) => {
             socket.emit('data', '\r\nConnection closed\r\n');
           });
 
-          // Receive commands from the frontend
+          // Receive commands from the frontend and write them to the SSH shell
           socket.on('command', (command) => {
-            // Filter restricted commands
-            const restrictedCommands = ['ip a', 'sudo', 'reboot']; // Add commands to restrict
-            const trimmedCommand = command.trim();
-
-            if (restrictedCommands.some((restricted) => trimmedCommand.startsWith(restricted))) {
-              console.log(`Blocked command: "${trimmedCommand}"`);
-              socket.emit('data', `\r\nError: The command "${trimmedCommand}" is not allowed.\r\n`);
-            } else {
-              // Write allowed commands to the SSH shell
-              stream.write(command);
-            }
+            stream.write(command);
           });
 
           // Handle terminal resize requests
@@ -123,7 +115,7 @@ app.post('/api/login', (req, res) => {
 
     const student = studentResult[0];
     const level = student.level;
-
+  
     // Fetch IP for the level
     const levelQuery = `SELECT ip FROM level_master WHERE level = ?`;
     db.query(levelQuery, [level], (err, levelResult) => {
@@ -132,14 +124,15 @@ app.post('/api/login', (req, res) => {
       const ip = levelResult[0].ip;
 
       // Fetch system user
-      const systemQuery = `SELECT * FROM system_list WHERE level = ? AND status=0 ORDER BY RAND() LIMIT 1`;
+      const systemQuery = `SELECT * FROM system_list WHERE level = ? AND status=0 ORDER BY RAND() LIMIT 1 `;
       db.query(systemQuery, [level], (err, systemResult) => {
         if (err || systemResult.length === 0) return res.status(404).json({ message: 'System user not found' });
 
         const systemUser = systemResult[0];
 
-        const statusQuery = `UPDATE system_list SET status = 1 WHERE id=${systemUser.id}`;
-        db.query(statusQuery);
+      const statusQuery = `UPDATE system_list SET status = 1 WHERE id=${systemUser.id}`;
+      db.query(statusQuery)
+
 
         // Fetch tasks for the system user
         const taskQuery = `SELECT * FROM task_description WHERE username = ?`;
@@ -154,9 +147,8 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// API Endpoint to execute a script
 app.post('/api/execute-script', (req, res) => {
-  const { ip, username, password, scriptPath } = req.body;
+  const { ip, username, password, scriptPath } = req.body; // Get details from frontend
 
   if (!ip || !username || !password || !scriptPath) {
     return res.status(400).json({ error: 'Missing required parameters' });
@@ -168,7 +160,7 @@ app.post('/api/execute-script', (req, res) => {
     .on('ready', () => {
       console.log(`SSH connection established with ${ip}`);
 
-      const command = `/bin/bash ${scriptPath}`;
+      const command = `/bin/bash ${scriptPath}`; // Command to execute script
       console.log('Executing command:', command);
 
       sshClient.exec(command, (err, stream) => {
@@ -193,7 +185,7 @@ app.post('/api/execute-script', (req, res) => {
         stream.on('close', (code, signal) => {
           console.log(`Script finished with code ${code}, signal ${signal}`);
           sshClient.end();
-          res.json({ output });
+          res.json({ output }); // Send output back to frontend
         });
       });
     })
@@ -207,40 +199,44 @@ app.post('/api/execute-script', (req, res) => {
       username,
       password,
     });
-});
+  });
 
-// API Endpoint for logout
-app.post('/api/logout', (req, res) => {
-  const { level_user_id, complete, reg_no } = req.body;
-
-  if (complete === 0) {
-    const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
-    db.query(resetStatus, [level_user_id], (err) => {
-      if (err) {
-        console.error('Error resetting status:', err);
-        return res.status(500).json({ message: 'Failed to reset status' });
-      }
-    });
-  } else if (complete === 1) {
-    const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
-    const updateLevel = `UPDATE student_list SET level = level + 1 WHERE register_number = ?`;
-
-    db.query(resetStatus, [level_user_id], (err) => {
-      if (err) {
-        console.error('Error resetting status:', err);
-        return res.status(500).json({ message: 'Failed to reset status' });
-      }
-      db.query(updateLevel, [reg_no], (err) => {
+  app.post('/api/logout', (req, res) => {
+    const { level_user_id, complete, reg_no } = req.body; // Ensure `reg_no` is sent in the request body
+    console.log('Logging out user:', level_user_id);
+  
+    if (complete === 0) {
+      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+      db.query(resetStatus, [level_user_id], (err) => {
         if (err) {
-          console.error('Error updating level:', err);
-          return res.status(500).json({ message: 'Failed to update level' });
+          console.error('Error resetting status:', err);
+          return res.status(500).json({ message: 'Failed to reset status' });
         }
       });
-    });
-  }
-
-  res.json({ message: 'Logout successful' });
-});
+    } else if (complete === 1) {
+      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+      const updateLevel = `UPDATE student_list SET level = level + 1 WHERE register_number = ?`;
+  
+      // Execute queries sequentially
+      db.query(resetStatus, [level_user_id], (err) => {
+        if (err) {
+          console.error('Error resetting status:', err);
+          return res.status(500).json({ message: 'Failed to reset status' });
+        }
+        db.query(updateLevel, [reg_no], (err) => {
+          if (err) {
+            console.error('Error updating level:', err);
+            return res.status(500).json({ message: 'Failed to update level' });
+          }
+        });
+      });
+    }
+  
+    // Send success response
+    res.json({ message: 'Logout successful' });
+    console.log('Logout successful');
+  });
+  
 
 // Start the server
 const PORT = 4000;
