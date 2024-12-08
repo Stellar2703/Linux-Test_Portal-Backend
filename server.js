@@ -26,10 +26,10 @@ const io = new Server(server, {
 // MySQL Connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'test',
-  password: 'test',
+  user: 'root',
+  password: 'tes0CQ)[iVE-Bg{x@v)w&Ev.OV$}t',
   database: 'linux',
-  port: '3307',
+  port: '3306',
 });
 
 db.connect((err) => {
