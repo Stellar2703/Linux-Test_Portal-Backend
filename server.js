@@ -24,12 +24,19 @@ const io = new Server(server, {
 
 
 // MySQL Connection
+// const db = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'tes0CQ)[iVE-Bg{x@v)w&Ev.OV$}t',
+//   database: 'linux',
+//   port: '3306',
+// });
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'tes0CQ)[iVE-Bg{x@v)w&Ev.OV$}t',
+  host: '10.10.111.2',
+  user: 'test',
+  password: 'test',
   database: 'linux',
-  port: '3306',
+  port: '3307',
 });
 
 db.connect((err) => {
