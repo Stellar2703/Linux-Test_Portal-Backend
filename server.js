@@ -9,7 +9,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON request bodies
 
 
@@ -35,7 +35,7 @@ app.get('/api/check-tasks', (req, res) => {
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: 'http://10.10.165.93:3000',
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
