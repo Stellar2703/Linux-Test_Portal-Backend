@@ -10,13 +10,13 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
-app.use(cors({ origin: '*' }));
+app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON request bodies
 
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
