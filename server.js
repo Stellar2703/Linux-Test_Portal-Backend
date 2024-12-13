@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 const { Client } = require('ssh2');
 const mysql = require('mysql2'); // Import MySQL library
 const { exec } = require('child_process'); // Import exec to execute shell commands
+const { SELECT } = require('sequelize/lib/query-types');
 const app = express();
 const server = http.createServer(app);
 
@@ -15,7 +16,7 @@ app.use(express.json()); // Parse JSON request bodies
 // Configure Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: 'http://10.30.10.22:3000',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,
@@ -32,7 +33,7 @@ const io = new Server(server, {
 //   port: '3306',
 // });
 const db = mysql.createConnection({
-  host: '10.10.111.2',
+  host: 'localhost',
   user: 'test',
   password: 'test',
   database: 'linux',
@@ -73,7 +74,7 @@ io.on('connection', (socket) => {
 
           // Forward data from the SSH shell to the frontend
           stream.on('data', (data) => {
-            if(!skipStream){
+            if (!skipStream) {
               socket.emit('data', data.toString());
             }
             skipStream = false
@@ -122,7 +123,7 @@ app.post('/api/login', (req, res) => {
 
     const student = studentResult[0];
     const level = student.level;
-  
+
     // Fetch IP for the level
     const levelQuery = `SELECT ip FROM level_master WHERE level = ?`;
     db.query(levelQuery, [level], (err, levelResult) => {
@@ -137,8 +138,8 @@ app.post('/api/login', (req, res) => {
 
         const systemUser = systemResult[0];
 
-      const statusQuery = `UPDATE system_list SET status = 1 WHERE id=${systemUser.id}`;
-      db.query(statusQuery)
+        const statusQuery = `UPDATE system_list SET status = 1 WHERE id=${systemUser.id}`;
+        db.query(statusQuery)
 
 
         // Fetch tasks for the system user
@@ -206,44 +207,137 @@ app.post('/api/execute-script', (req, res) => {
       username,
       password,
     });
+});
+
+// app.post('/api/dashboard/main'),(res) =>{
+//   const Total_students = `SELECT COUNT(*) FROM summary where date = CURDATE()`;
+//   const Cleared_today = `SELECT COUNT(*) FROM summary where date = CURDATE() and final_result = 1`;
+//   const Benchmark = `SELECT COUNT(*) FROM summary where date = CURDATE() and final_result = 1 and task_completed = 1`;
+//   const Failed_today = `SELECT COUNT(*) FROM summary where date = CURDATE() and final_result = 0`;
+//   db.query(Total_students, (err, Total_students) => {
+//     if (err) {
+//       console.error('Error fetching Total_students:', err);
+//       return res.status(500).json({ message: 'Error fetching Total_students' });
+//     }
+//   });
+//   db.query(Cleared_today, (err, Cleared_today) => {
+//     if (err) {
+//       console.error('Error fetching Cleared_today:', err);
+//       return res.status(500).json({ message: 'Error fetching Cleared_today' });
+//     }
+//   });
+//   db.query(Benchmark, (err, Benchmark) => {
+//     if (err) {
+//       console.error('Error fetching Benchmark:', err);
+//       return res.status(500).json({ message: 'Error fetching Benchmark' });
+//     }
+//   });
+//   db.query(Failed_today, (err, Failed_today) => {
+//     if (err) {
+//       console.error('Error fetching Failed_today:', err);
+//       return res.status(500).json({ message: 'Error fetching Failed_today' });
+//     }
+//   });
+//   res.json({ Total_students, Cleared_today, Benchmark, Failed_today });
+//   console.log('Dashboard data fetched');
+// }
+
+app.post('/api/dashboard/main', (req, res) => {
+    const Total_students = `SELECT COUNT(*) AS Total_students FROM summary WHERE date = CURDATE()`;
+    const Cleared_today = `SELECT COUNT(*) AS Cleared_today FROM summary WHERE date = CURDATE() AND final_result = 1`;
+    const Benchmark = `SELECT COUNT(*) AS Benchmark FROM summary WHERE date = CURDATE() AND final_result = 1 AND task_completed = 1`;
+    const Failed_today = `SELECT COUNT(*) AS Failed_today FROM summary WHERE date = CURDATE() AND final_result = 0`;
+
+    // Execute all queries and collect results
+    const queries = [
+        { query: Total_students, key: 'Total_students' },
+        { query: Cleared_today, key: 'Cleared_today' },
+        { query: Benchmark, key: 'Benchmark' },
+        { query: Failed_today, key: 'Failed_today' },
+    ];
+
+    const results = {};
+    let completed = 0;
+
+    queries.forEach(({ query, key }) => {
+        db.query(query, (err, result) => {
+            if (err) {
+                console.error(`Error fetching ${key}:`, err);
+                return res.status(500).json({ message: `Error fetching ${key}` });
+            }
+
+            // Store the result in the results object
+            results[key] = result[0][key];
+            completed++;
+
+            // If all queries are completed, send the response
+            if (completed === queries.length) {
+                res.json(results);
+                console.log('Dashboard data fetched:', results);
+            }
+        });
+    });
+});
+
+
+app.post('/api/dashboard/list', (req, res) => {
+  const list = `SELECT * FROM summary:`;
+  db.query(list, (err, list) => {
+    if (err) {
+      console.error('Error fetching list:', err);
+      return res.status(500).json({ message: 'Error fetching list' });
+    }
+    res.json({ list });
+    console.log('List fetched');
+  });
+  res.json({list});
+});
+
+app.post('/api/logout', (req, res) => {
+  const { level_user_id, complete, reg_no } = req.body; // Ensure `reg_no` is sent in the request body
+  console.log('Logging out user:', level_user_id);
+  const task_completed = complete === 1 ? 1 : 0;
+  const summary = `insert into summary (date,time,register_number,name,mail_id,task_completed,final_result) values (NOW(),NOW(), ?, (SELECT name FROM student_list WHERE register_number = ?), (SELECT mail_id FROM student_list WHERE register_number = ?), ?, ?)`;
+  db.query(summary, [reg_no,reg_no,reg_no, complete, complete], (err) => {
+    if (err) {
+      console.error('Error in Manufacturing the student summary', err);
+      return res.status(500).json({ message: 'Error in Manufacturing the student summary' });
+    }
   });
 
-  app.post('/api/logout', (req, res) => {
-    const { level_user_id, complete, reg_no } = req.body; // Ensure `reg_no` is sent in the request body
-    console.log('Logging out user:', level_user_id);
-  
-    if (complete === 0) {
-      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
-      db.query(resetStatus, [level_user_id], (err) => {
+  // Reset the status of the system user
+  if (complete === 0) {
+    const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+    db.query(resetStatus, [level_user_id], (err) => {
+      if (err) {
+        console.error('Error resetting status:', err);
+        return res.status(500).json({ message: 'Failed to reset status' });
+      }
+    });
+  } else if (complete === 1) {
+    const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
+    const updateLevel = `UPDATE student_list SET level = level + 1 WHERE register_number = ?`;
+
+    // Execute queries sequentially
+    db.query(resetStatus, [level_user_id], (err) => {
+      if (err) {
+        console.error('Error resetting status:', err);
+        return res.status(500).json({ message: 'Failed to reset status' });
+      }
+      db.query(updateLevel, [reg_no], (err) => {
         if (err) {
-          console.error('Error resetting status:', err);
-          return res.status(500).json({ message: 'Failed to reset status' });
+          console.error('Error updating level:', err);
+          return res.status(500).json({ message: 'Failed to update level' });
         }
       });
-    } else if (complete === 1) {
-      const resetStatus = `UPDATE system_list SET status = 0 WHERE id = ?`;
-      const updateLevel = `UPDATE student_list SET level = level + 1 WHERE register_number = ?`;
-  
-      // Execute queries sequentially
-      db.query(resetStatus, [level_user_id], (err) => {
-        if (err) {
-          console.error('Error resetting status:', err);
-          return res.status(500).json({ message: 'Failed to reset status' });
-        }
-        db.query(updateLevel, [reg_no], (err) => {
-          if (err) {
-            console.error('Error updating level:', err);
-            return res.status(500).json({ message: 'Failed to update level' });
-          }
-        });
-      });
-    }
-  
-    // Send success response
-    res.json({ message: 'Logout successful' });
-    console.log('Logout successful');
-  });
-  
+    });
+  }
+
+  // Send success response
+  res.json({ message: 'Logout successful' });
+  console.log('Logout successful');
+});
+
 
 // Start the server
 const PORT = 4000;
