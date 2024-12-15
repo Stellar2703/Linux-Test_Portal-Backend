@@ -242,7 +242,7 @@ app.post('/api/execute-script', (req, res) => {
 //   console.log('Dashboard data fetched');
 // }
 
-app.post('/api/dashboard/main', (req, res) => {
+app.get('/api/dashboard/main', (req, res) => {
     const Total_students = `SELECT COUNT(*) AS Total_students FROM summary WHERE date = CURDATE()`;
     const Cleared_today = `SELECT COUNT(*) AS Cleared_today FROM summary WHERE date = CURDATE() AND final_result = 1`;
     const Benchmark = `SELECT COUNT(*) AS Benchmark FROM summary WHERE date = CURDATE() AND final_result = 1 AND task_completed = 1`;
@@ -280,6 +280,36 @@ app.post('/api/dashboard/main', (req, res) => {
 });
 
 
+app.get('/api/students', (req, res) => {
+  const query = `SELECT id, name, level, register_number, mail_id,block FROM student_list`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching student details:', err);
+      console.log('error');
+      return res.status(500).json({ message: 'Error fetching student details' });
+    }
+    res.json(results);
+    console.log('List fetched');
+  });
+});
+
+app.get('/api/result', (req, res) => {
+  const query = `SELECT * FROM summary`;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching student details:', err);
+      console.log('error');
+      return res.status(500).json({ message: 'Error fetching student details' });
+    }
+    res.json(results);
+    console.log('List fetched');
+  });
+});
+
+
+
 app.post('/api/dashboard/list', (req, res) => {
   const list = `SELECT * FROM summary:`;
   db.query(list, (err, list) => {
@@ -288,7 +318,7 @@ app.post('/api/dashboard/list', (req, res) => {
       return res.status(500).json({ message: 'Error fetching list' });
     }
     res.json({ list });
-    console.log('List fetched');
+    // console.log('List fetched');
   });
   res.json({list});
 });
