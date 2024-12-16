@@ -33,7 +33,7 @@ const io = new Server(server, {
 //   port: '3306',
 // });
 const db = mysql.createConnection({
-  host: 'localhost',
+  host: '10.10.111.2',
   user: 'test',
   password: 'test',
   database: 'linux',
